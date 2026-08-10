@@ -19,43 +19,49 @@
       --line:#2b313a; --accent:#3fa876; --chip:#232a2b; --warn:#e0913f; --danger:#e5675a;}
   }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--ink);
-    font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  header{padding:18px 20px 0;max-width:920px;margin:0 auto}
-  h1{margin:0;font-size:22px;letter-spacing:.2px}
-  .sub{color:var(--muted);font-size:13px;margin-top:2px}
-  nav{display:flex;gap:4px;max-width:920px;margin:14px auto 0;padding:0 20px;flex-wrap:wrap}
-  nav button{border:0;background:transparent;color:var(--muted);padding:9px 14px;
-    border-radius:9px 9px 0 0;font-size:14px;cursor:pointer}
-  nav button.on{color:var(--ink);background:var(--card);font-weight:600}
-  main{max-width:920px;margin:0 auto;padding:16px 20px 70px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 12px}
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:14px 16px 0;max-width:920px;margin:0 auto}
+  h1{margin:0;font-size:24px;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:14px;margin-top:3px}
+  nav{position:sticky;top:0;z-index:5;display:flex;gap:6px;max-width:920px;margin:12px auto 0;
+    padding:8px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--bg);border-bottom:1px solid var(--line)}
+  nav button{border:0;background:var(--chip);color:var(--muted);padding:11px 16px;border-radius:11px;
+    font-size:15px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+  nav button.on{color:var(--accent-ink);background:var(--accent);font-weight:600}
+  main{max-width:920px;margin:0 auto;padding:14px 14px 90px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 12px}
   .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-  .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:9px;
-    padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:11px;
+    padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;min-height:46px}
   .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
-  .btn.sm{padding:7px 11px;font-size:13px}
+  .btn.sm{padding:9px 13px;font-size:14px;min-height:40px}
   .btn:active{transform:translateY(1px)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
   h3{margin:2px 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
-  .meal{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .meal{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
   .meal:last-child{border-bottom:0}
   .meal.done .name{text-decoration:line-through;color:var(--muted)}
-  .name{font-weight:500}
+  .meal.ok{background:linear-gradient(90deg,rgba(47,125,91,.10),transparent);border-radius:10px;padding-left:10px;margin-left:-10px}
+  .meal.ok .name{color:var(--accent)}
+  .name{font-weight:600;font-size:16px}
   .code{font:12px ui-monospace,monospace;color:var(--muted);margin-right:8px}
-  .mini{background:var(--chip);border:0;border-radius:7px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .mini{background:var(--chip);border:0;border-radius:10px;padding:10px 13px;font-size:14px;cursor:pointer;color:var(--ink);min-height:40px}
   .mini.undo{color:var(--warn)}
   table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+  th,td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:middle}
   th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-  .tag{background:var(--chip);color:var(--muted);border-radius:20px;padding:2px 9px;font-size:12px}
+  .tag{background:var(--chip);color:var(--muted);border-radius:20px;padding:3px 10px;font-size:12px}
   .buy{color:var(--warn);font-weight:700}
-  input,select{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:7px;
-    padding:6px 8px;font-size:14px;font-family:inherit}
-  input[type=number]{width:76px}
-  .search{width:100%;margin-bottom:10px;padding:9px 12px}
+  .cost{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
+  input,select{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:9px;
+    padding:11px 12px;font-size:16px;font-family:inherit;min-height:44px}
+  input[type=number]{width:92px}
+  input[type=checkbox]{min-height:auto;width:20px;height:20px}
+  .search{width:100%;margin-bottom:10px;padding:12px 14px}
   .empty{color:var(--muted);text-align:center;padding:26px}
   details{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card);overflow:hidden}
   details>summary{cursor:pointer;padding:11px 14px;font-weight:600;list-style:none;display:flex;
@@ -71,6 +77,7 @@
   .pill.media{color:var(--warn);border-color:var(--warn)}
   .pill.lact{color:var(--accent);border-color:var(--accent)}
   .pill.aler{color:var(--muted)}
+  .pill.ok{color:var(--accent);border-color:var(--accent);background:rgba(47,125,91,.10);font-weight:600}
   .flash{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);
     color:var(--bg);padding:9px 16px;border-radius:9px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
   .flash.show{opacity:.95}
@@ -172,11 +179,19 @@ function nutriReceta(cod){
     if(i.alergenos)i.alergenos.split(",").filter(Boolean).forEach(a=>al.add(a)); });
   return {kcal:Math.round(kcal),histamina:HIST_INV[hist],lactosa:lact?1:0,alergenos:[...al].sort()};
 }
+function dispCoste(cod, inv){
+  inv=inv||invMap(); let disponible=true, coste=0, tienePrecio=false;
+  bomOf(cod).forEach(b=>{ const i=ingByName(b.ingrediente)||{};
+    if((inv[b.ingrediente]||0) < (b.cantidad||0)) disponible=false;
+    if(i.precio!=null){ coste+=i.precio*(b.cantidad||0); tienePrecio=true; } });
+  return {disponible, coste: tienePrecio?Math.round(coste*100)/100:null};
+}
 function menuActual(){
-  const sem=maxMenuSem();
+  const sem=maxMenuSem(), inv=invMap();
   const items=sem==null?[]:DB.menu.filter(m=>m.semana===sem)
     .sort((a,b)=>(a.tipo<b.tipo?1:a.tipo>b.tipo?-1:0)||a.id-b.id)
-    .map(m=>{ const r=recetaByCodigo(m.codigo)||{}; return {codigo:m.codigo,tipo:m.tipo,consumida:m.consumida,nombre:r.nombre,nutri:nutriReceta(m.codigo)}; });
+    .map(m=>{ const r=recetaByCodigo(m.codigo)||{}, dc=dispCoste(m.codigo,inv);
+      return {codigo:m.codigo,tipo:m.tipo,consumida:m.consumida,nombre:r.nombre,nutri:nutriReceta(m.codigo),disponible:dc.disponible,coste:dc.coste}; });
   return {semana:sem,items};
 }
 function listaCompra(){
@@ -219,7 +234,7 @@ const historialList=()=>DB.historial.slice().sort((a,b)=>(b.semana-a.semana)||(b
   .map(h=>{ const r=recetaByCodigo(h.codigo)||{}; return {semana:h.semana,codigo:h.codigo,nombre:r.nombre,puntuacion:h.puntuacion}; });
 function recetaDetalle(cod){ const r=recetaByCodigo(cod); if(!r)return null;
   return {receta:{...r},ingredientes:bomOf(cod).slice().sort((a,b)=>a.ingrediente.localeCompare(b.ingrediente))
-    .map(b=>({id:b.id,ingrediente:b.ingrediente,cantidad:b.cantidad,unidad:b.unidad,categoria:b.categoria})),nutri:nutriReceta(cod)}; }
+    .map(b=>({id:b.id,ingrediente:b.ingrediente,cantidad:b.cantidad,unidad:b.unidad,categoria:b.categoria})),nutri:nutriReceta(cod),...dispCoste(cod)}; }
 function guardarReceta(d){
   let cod=(d.codigo||"").trim(); const tipo=d.tipo||"Almuerzo/Cena";
   if(!cod){ const p=tipo==="Desayuno"?"D":"A";
@@ -274,7 +289,8 @@ function post(p,b){ return Promise.resolve(localApi(p,"POST",b)); }
 function renderDatos(){
   view.innerHTML=`
     <div class="card"><strong>Copia de seguridad</strong>
-      <div class="sub">Tus datos viven SOLO en este dispositivo. Exporta de vez en cuando por seguridad.</div>
+      <div class="sub">Tus datos viven SOLO en este dispositivo. Exporta de vez en cuando por seguridad.
+      «Importar» acepta un backup completo o un archivo solo de precios (facturas).</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
         <button class="btn" onclick="exportarDatos()">⬇️ Exportar</button>
         <label class="btn ghost" style="cursor:pointer">⬆️ Importar<input type="file" accept="application/json" onchange="importarDatos(event)" style="display:none"></label>
@@ -285,8 +301,21 @@ function renderDatos(){
 function exportarDatos(){ const b=new Blob([JSON.stringify(DB)],{type:"application/json"}); const a=document.createElement("a");
   a.href=URL.createObjectURL(b); a.download="recetario-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click(); flash("Backup descargado"); }
 function importarDatos(ev){ const f=ev.target.files[0]; if(!f)return; const rd=new FileReader();
-  rd.onload=()=>{ try{ const d=JSON.parse(rd.result); if(!d.recetas||!d.ingredientes)throw 0; DB=d; if(!DB.seq)DB.seq={bom:0,historial:0,menu:0};
-    saveDB(); flash("Datos importados"); loadRefs().then(render); }catch(e){ flash("Archivo inválido"); } }; rd.readAsText(f); }
+  rd.onload=()=>{ try{
+      const d=JSON.parse(rd.result);
+      if(d.precios && !d.recetas){                 // archivo SOLO de precios -> merge
+        let n=0, faltan=[];
+        for(const nombre in d.precios){ const i=ingByName(nombre);
+          if(i){ i.precio=parseFloat(d.precios[nombre]); n++; } else faltan.push(nombre); }
+        saveDB(); render();
+        flash(`${n} precios actualizados`+(faltan.length?` · ${faltan.length} sin match`:""));
+        if(faltan.length) console.log("Sin match:",faltan);
+        return;
+      }
+      if(!d.recetas||!d.ingredientes)throw 0;       // backup completo -> reemplaza
+      DB=d; if(!DB.seq)DB.seq={bom:0,historial:0,menu:0};
+      saveDB(); flash("Datos importados"); loadRefs().then(render);
+    }catch(e){ flash("Archivo inválido"); } }; rd.readAsText(f); }
 function flash(m){const f=$("#flash");f.textContent=m;f.classList.add("show");setTimeout(()=>f.classList.remove("show"),1600);}
 const esc = s => (s??"").toString().replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function nutriBadges(n){
@@ -339,10 +368,14 @@ async function renderMenu(){
   const g = {"Desayuno":[], "Almuerzo/Cena":[]};
   (m.items||[]).forEach(i=>g[i.tipo]?.push(i));
   const col = (t,arr) => `<div class="card"><h3>${t}</h3>
-    ${arr.length ? arr.map(i=>`<div class="meal ${i.consumida?'done':''}">
+    ${arr.length ? arr.map(i=>`<div class="meal ${i.consumida?'done':''} ${i.disponible&&!i.consumida?'ok':''}">
         <div style="min-width:0">
           <div><span class="code">${i.codigo}</span><span class="name">${esc(i.nombre)}</span></div>
-          <div class="nb"><span class="kcal">${i.nutri?.kcal ?? '–'} kcal</span>${nutriBadges(i.nutri)}</div>
+          <div class="nb">
+            ${i.disponible?'<span class="pill ok">✓ tienes todo</span>':''}
+            <span class="kcal">${i.nutri?.kcal ?? '–'} kcal</span>
+            ${i.coste!=null?`<span class="cost">≈ ${i.coste.toFixed(2)} €</span>`:''}
+            ${nutriBadges(i.nutri)}</div>
         </div>
         ${i.consumida
           ? `<button class="mini undo" onclick="desmarcar('${i.codigo}')">↩ deshacer</button>`
@@ -448,9 +481,10 @@ function pintaInv(){
       <div class="inner"><table>
         ${byCat[cat].map(r=>{const id=btoa(unescape(encodeURIComponent(r.ingrediente)));return `<tr>
           <td>${esc(r.ingrediente)}</td>
-          <td class="num"><input type="number" step="0.1" value="${r.cantidad}" id="inv_${id}"></td>
-          <td style="width:60px">${esc(r.unidad||'')}</td>
-          <td style="width:70px"><button class="mini" onclick="guardaInv('${encodeURIComponent(r.ingrediente)}')">✓</button></td>
+          <td class="num"><input type="number" step="0.1" inputmode="decimal" value="${r.cantidad}" id="inv_${id}"
+              onchange="guardaInv('${encodeURIComponent(r.ingrediente)}')"></td>
+          <td style="width:54px">${esc(r.unidad||'')}</td>
+          <td style="width:56px"><button class="mini" onclick="guardaInv('${encodeURIComponent(r.ingrediente)}')" title="Guardar">✓</button></td>
         </tr>`}).join("")}
       </table></div>
     </details>`).join("") : '<div class="empty">Sin resultados.</div>';
