@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recetario</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2f7d5b">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1c2128; --muted:#6a737d; --line:#e5e8eb;
+    --accent:#2f7d5b; --accent-ink:#fff; --chip:#eef2f0; --warn:#b4530a; --danger:#b42318;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#15181c; --card:#1e2228; --ink:#e6e9ee; --muted:#9aa4af;
+      --line:#2b313a; --accent:#3fa876; --chip:#232a2b; --warn:#e0913f; --danger:#e5675a;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{padding:18px 20px 0;max-width:920px;margin:0 auto}
+  h1{margin:0;font-size:22px;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  nav{display:flex;gap:4px;max-width:920px;margin:14px auto 0;padding:0 20px;flex-wrap:wrap}
+  nav button{border:0;background:transparent;color:var(--muted);padding:9px 14px;
+    border-radius:9px 9px 0 0;font-size:14px;cursor:pointer}
+  nav button.on{color:var(--ink);background:var(--card);font-weight:600}
+  main{max-width:920px;margin:0 auto;padding:16px 20px 70px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 12px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:9px;
+    padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .btn.sm{padding:7px 11px;font-size:13px}
+  .btn:active{transform:translateY(1px)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  h3{margin:2px 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  .meal{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .meal:last-child{border-bottom:0}
+  .meal.done .name{text-decoration:line-through;color:var(--muted)}
+  .name{font-weight:500}
+  .code{font:12px ui-monospace,monospace;color:var(--muted);margin-right:8px}
+  .mini{background:var(--chip);border:0;border-radius:7px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .mini.undo{color:var(--warn)}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tag{background:var(--chip);color:var(--muted);border-radius:20px;padding:2px 9px;font-size:12px}
+  .buy{color:var(--warn);font-weight:700}
+  input,select{background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:7px;
+    padding:6px 8px;font-size:14px;font-family:inherit}
+  input[type=number]{width:76px}
+  .search{width:100%;margin-bottom:10px;padding:9px 12px}
+  .empty{color:var(--muted);text-align:center;padding:26px}
+  details{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card);overflow:hidden}
+  details>summary{cursor:pointer;padding:11px 14px;font-weight:600;list-style:none;display:flex;
+    justify-content:space-between;align-items:center}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::after{content:"▸";color:var(--muted);font-size:12px}
+  details[open]>summary::after{content:"▾"}
+  details .inner{padding:0 14px 8px}
+  .nb{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px}
+  .kcal{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
+  .pill{font-size:11px;padding:1px 8px;border-radius:20px;border:1px solid var(--line);white-space:nowrap}
+  .pill.alta{color:var(--danger);border-color:var(--danger)}
+  .pill.media{color:var(--warn);border-color:var(--warn)}
+  .pill.lact{color:var(--accent);border-color:var(--accent)}
+  .pill.aler{color:var(--muted)}
+  .flash{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);
+    color:var(--bg);padding:9px 16px;border-radius:9px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
+  .flash.show{opacity:.95}
+  .link{background:none;border:0;color:var(--accent);cursor:pointer;font-size:14px;padding:0;text-align:left}
+  .del{color:var(--danger);cursor:pointer;background:none;border:0;font-size:13px}
+  .bomrow{display:grid;grid-template-columns:1fr 84px 96px 30px;gap:6px;margin-bottom:6px;align-items:center}
+  .bomrow input{width:100%}
+  @media(max-width:520px){.bomrow{grid-template-columns:1fr 70px 78px 28px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🍽️ Recetario</h1>
+  <div class="sub" id="sub">Cargando…</div>
+</header>
+<nav>
+  <button data-tab="menu" class="on">Menú</button>
+  <button data-tab="compra">Compra</button>
+  <button data-tab="inventario">Inventario</button>
+  <button data-tab="historial">Historial</button>
+  <button data-tab="editar">Editar</button>
+  <button data-tab="datos">Datos</button>
+</nav>
+<main id="view"></main>
+<div class="flash" id="flash"></div>
+<datalist id="dl-ings"></datalist>
+
+<script>
+const $ = s => document.querySelector(s);
+const view = $("#view");
+let tab = "menu";
+let CATS = [];         // lista de categorías
+let INGS = [];         // maestro de ingredientes (para autocompletar/dropdowns)
+
+// ================== CAPA DE DATOS LOCAL (offline, en el móvil) ==================
+const STORE_KEY="recetario_db_v1";
+let DB=null;
+const CAT_ORDER=["Verduras y hortalizas","Frutas","Carnes","Pescados y mariscos","Lácteos y huevos",
+  "Panadería","Despensa","Salsas y condimentos","Especias","Bebidas","Congelados","Otros"];
+const HIST_ORD={baja:0,media:1,alta:2}, HIST_INV=["baja","media","alta"];
+const N_DES=5, N_ALM=10;
+
+async function initDB(){
+  const saved=localStorage.getItem(STORE_KEY);
+  if(saved){ DB=JSON.parse(saved); }
+  else { DB=await fetch("seed.json").then(r=>r.json()); if(!DB.seq)DB.seq={bom:0,historial:0,menu:0}; saveDB(); }
+  if(navigator.storage&&navigator.storage.persist){ try{ await navigator.storage.persist(); }catch(e){} }
+}
+function saveDB(){ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+function nextId(t){ DB.seq[t]=(DB.seq[t]||0)+1; return DB.seq[t]; }
+const recetaByCodigo=c=>DB.recetas.find(r=>r.codigo===c);
+const ingByName=n=>DB.ingredientes.find(i=>i.nombre===n);
+const bomOf=cod=>DB.bom.filter(b=>b.receta_codigo===cod);
+const invMap=()=>{ const m={}; DB.inventario.forEach(r=>m[r.ingrediente]=r.cantidad); return m; };
+const maxMenuSem=()=>DB.menu.length?Math.max(...DB.menu.map(m=>m.semana)):null;
+function semanaActual(){ const s=maxMenuSem(); if(s!=null)return s;
+  const h=DB.historial.map(x=>x.semana).filter(x=>x!=null); return h.length?Math.max(...h):1; }
+function proximaSemana(){ const a=[...DB.menu.map(m=>m.semana),...DB.historial.map(h=>h.semana)].filter(x=>x!=null);
+  return a.length?Math.max(...a)+1:1; }
+function ultimoUso(){ const m={}; DB.historial.forEach(h=>{ if(h.codigo!=null) m[h.codigo]=Math.max(m[h.codigo]??-1e9,h.semana??0); }); return m; }
+function pickWeighted(pool,pesos){ let t=pesos.reduce((a,b)=>a+b,0), x=Math.random()*t, i=0;
+  for(;i<pesos.length;i++){ x-=pesos[i]; if(x<=0)break; } return Math.min(i,pool.length-1); }
+function elegir(tipo,n,sem,excluir){
+  const ex=new Set(excluir||[]), ult=ultimoUso(), pool=[], pesos=[];
+  DB.recetas.filter(r=>r.tipo===tipo).forEach(r=>{ if(ex.has(r.codigo))return;
+    const u=ult[r.codigo], rec=(u!=null)?(sem-u):(sem+2); pool.push(r.codigo); pesos.push(Math.max(1,rec)); });
+  const out=[], k=Math.min(n,pool.length);
+  for(let j=0;j<k;j++){ const i=pickWeighted(pool,pesos); out.push(pool[i]); pool.splice(i,1); pesos.splice(i,1); }
+  return out;
+}
+function generarMenu(resortear){
+  let sem; const mx=maxMenuSem();
+  if(resortear&&mx!=null){ sem=semanaActual(); DB.menu=DB.menu.filter(m=>m.semana!==sem); } else sem=proximaSemana();
+  [["Desayuno",N_DES],["Almuerzo/Cena",N_ALM]].forEach(([tipo,n])=>
+    elegir(tipo,n,sem,[]).forEach(cod=>DB.menu.push({id:nextId('menu'),semana:sem,codigo:cod,tipo,consumida:0})));
+  saveDB();
+}
+const costeReceta=(cod,inv)=>bomOf(cod).reduce((s,b)=>s+Math.max(0,(b.cantidad||0)-(inv[b.ingrediente]||0)),0);
+const consumirVirtual=(cod,inv)=>bomOf(cod).forEach(b=>inv[b.ingrediente]=Math.max(0,(inv[b.ingrediente]||0)-(b.cantidad||0)));
+function generarMenuInventario(){
+  const sem=proximaSemana(); DB.menu=DB.menu.filter(m=>m.semana!==sem); const inv=invMap();
+  [["Desayuno",N_DES],["Almuerzo/Cena",N_ALM]].forEach(([tipo,n])=>{
+    let cand=DB.recetas.filter(r=>r.tipo===tipo).map(r=>r.codigo); const k=Math.min(n,cand.length);
+    for(let j=0;j<k;j++){ cand.sort((a,b)=>(costeReceta(a,inv)-costeReceta(b,inv))||(Math.random()-0.5));
+      const el=cand.shift(); consumirVirtual(el,inv); DB.menu.push({id:nextId('menu'),semana:sem,codigo:el,tipo,consumida:0}); }
+  });
+  saveDB();
+}
+function cambiarPlatoLocal(codigo){
+  const sem=semanaActual(), row=DB.menu.find(m=>m.codigo===codigo&&m.semana===sem); if(!row)return null;
+  const actuales=DB.menu.filter(m=>m.semana===sem).map(m=>m.codigo);
+  const nv=elegir(row.tipo,1,sem,actuales); if(!nv.length)return null;
+  row.codigo=nv[0]; row.consumida=0; saveDB(); return nv[0];
+}
+function nutriReceta(cod){
+  let kcal=0,hist=0,lact=0; const al=new Set();
+  bomOf(cod).forEach(b=>{ const i=ingByName(b.ingrediente); if(!i)return;
+    kcal+=(i.kcal||0)*(b.cantidad||0); hist=Math.max(hist,HIST_ORD[i.histamina]||0); lact=lact||(i.lactosa||0);
+    if(i.alergenos)i.alergenos.split(",").filter(Boolean).forEach(a=>al.add(a)); });
+  return {kcal:Math.round(kcal),histamina:HIST_INV[hist],lactosa:lact?1:0,alergenos:[...al].sort()};
+}
+function menuActual(){
+  const sem=maxMenuSem();
+  const items=sem==null?[]:DB.menu.filter(m=>m.semana===sem)
+    .sort((a,b)=>(a.tipo<b.tipo?1:a.tipo>b.tipo?-1:0)||a.id-b.id)
+    .map(m=>{ const r=recetaByCodigo(m.codigo)||{}; return {codigo:m.codigo,tipo:m.tipo,consumida:m.consumida,nombre:r.nombre,nutri:nutriReceta(m.codigo)}; });
+  return {semana:sem,items};
+}
+function listaCompra(){
+  const sem=maxMenuSem(), nec={}, recs={};
+  DB.menu.filter(m=>m.semana===sem).forEach(m=>bomOf(m.codigo).forEach(b=>{
+    const e=nec[b.ingrediente]||(nec[b.ingrediente]={qty:0,unidad:b.unidad,cat:b.categoria}); e.qty+=b.cantidad||0;
+    const r=recetaByCodigo(m.codigo)||{}; (recs[b.ingrediente]||(recs[b.ingrediente]=[])).push({codigo:m.codigo,nombre:r.nombre,cantidad:b.cantidad}); }));
+  const inv=invMap(), out=[];
+  for(const ing in nec){ const e=nec[ing], m=ingByName(ing), tengo=inv[ing]||0, falta=(e.qty||0)-tengo;
+    out.push({ingrediente:ing,necesita:Math.round(e.qty*100)/100,tengo:Math.round(tengo*100)/100,
+      por_comprar:falta>0?Math.ceil(falta):0,unidad:(m&&m.unidad)||e.unidad,categoria:(m&&m.categoria)||"Otros",
+      mercados:(m&&m.mercados)||"",precio:(m&&m.precio)??null,
+      recetas:(recs[ing]||[]).sort((a,b)=>(a.nombre||"").localeCompare(b.nombre||"")),
+      lactosa:(m&&m.lactosa)||0,histamina:(m&&m.histamina)||"baja",alergenos:(m&&m.alergenos)||""}); }
+  out.sort((a,b)=>(b.por_comprar-a.por_comprar)||a.ingrediente.toLowerCase().localeCompare(b.ingrediente.toLowerCase()));
+  return out;
+}
+function setInv(ing,c){ const r=DB.inventario.find(x=>x.ingrediente===ing); if(r)r.cantidad=c; else DB.inventario.push({ingrediente:ing,cantidad:c}); }
+function addInv(ing,c){ const r=DB.inventario.find(x=>x.ingrediente===ing); if(r)r.cantidad=(r.cantidad||0)+c; else DB.inventario.push({ingrediente:ing,cantidad:c}); }
+function consumir(codigo){
+  const sem=semanaActual(), m=DB.menu.find(x=>x.codigo===codigo&&x.semana===sem);
+  if(m&&m.consumida)return; if(m)m.consumida=1;
+  DB.historial.push({id:nextId('historial'),semana:sem,codigo:codigo,consumida:1,puntuacion:0});
+  bomOf(codigo).forEach(b=>{ const r=DB.inventario.find(x=>x.ingrediente===b.ingrediente); if(r)r.cantidad=Math.max(0,(r.cantidad||0)-(b.cantidad||0)); });
+  saveDB();
+}
+function desconsumir(codigo){
+  const sem=semanaActual(), m=DB.menu.find(x=>x.codigo===codigo&&x.semana===sem); if(m)m.consumida=0;
+  let idx=-1,mid=-1; DB.historial.forEach((h,i)=>{ if(h.codigo===codigo&&h.semana===sem&&h.id>mid){mid=h.id;idx=i;} });
+  if(idx>=0)DB.historial.splice(idx,1);
+  bomOf(codigo).forEach(b=>addInv(b.ingrediente,b.cantidad||0)); saveDB();
+}
+const categoriasList=()=>{ const en=new Set(DB.ingredientes.map(i=>i.categoria).filter(Boolean));
+  return [...CAT_ORDER.filter(c=>en.has(c)),...[...en].filter(c=>!CAT_ORDER.includes(c)).sort()]; };
+const ingredientesList=()=>DB.ingredientes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre))
+  .map(i=>({nombre:i.nombre,unidad:i.unidad,precio:i.precio,mercados:i.mercados,categoria:i.categoria||"Otros",kcal:i.kcal,lactosa:i.lactosa,histamina:i.histamina,alergenos:i.alergenos}));
+const inventarioList=()=>DB.inventario.slice().sort((a,b)=>a.ingrediente.localeCompare(b.ingrediente))
+  .map(r=>{ const m=ingByName(r.ingrediente)||{}; return {ingrediente:r.ingrediente,cantidad:r.cantidad,unidad:m.unidad,categoria:m.categoria||"Otros",kcal:m.kcal,lactosa:m.lactosa,histamina:m.histamina,alergenos:m.alergenos}; });
+const historialList=()=>DB.historial.slice().sort((a,b)=>(b.semana-a.semana)||(b.id-a.id)).slice(0,200)
+  .map(h=>{ const r=recetaByCodigo(h.codigo)||{}; return {semana:h.semana,codigo:h.codigo,nombre:r.nombre,puntuacion:h.puntuacion}; });
+function recetaDetalle(cod){ const r=recetaByCodigo(cod); if(!r)return null;
+  return {receta:{...r},ingredientes:bomOf(cod).slice().sort((a,b)=>a.ingrediente.localeCompare(b.ingrediente))
+    .map(b=>({id:b.id,ingrediente:b.ingrediente,cantidad:b.cantidad,unidad:b.unidad,categoria:b.categoria})),nutri:nutriReceta(cod)}; }
+function guardarReceta(d){
+  let cod=(d.codigo||"").trim(); const tipo=d.tipo||"Almuerzo/Cena";
+  if(!cod){ const p=tipo==="Desayuno"?"D":"A";
+    const nums=DB.recetas.filter(r=>r.codigo.startsWith(p)).map(r=>parseInt(r.codigo.slice(1))).filter(x=>!isNaN(x));
+    cod=p+((nums.length?Math.max(...nums):0)+1); }
+  const r=recetaByCodigo(cod);
+  if(r){ r.nombre=(d.nombre||"").trim(); r.tipo=tipo; } else DB.recetas.push({codigo:cod,nombre:(d.nombre||"").trim(),tipo});
+  saveDB(); return cod;
+}
+function borrarReceta(cod){ DB.bom=DB.bom.filter(b=>b.receta_codigo!==cod); DB.menu=DB.menu.filter(m=>m.codigo!==cod); DB.recetas=DB.recetas.filter(r=>r.codigo!==cod); saveDB(); }
+function guardarBom(cod,items){ DB.bom=DB.bom.filter(b=>b.receta_codigo!==cod);
+  (items||[]).forEach(it=>{ const ing=(it.ingrediente||"").trim(); if(!ing)return;
+    DB.bom.push({id:nextId('bom'),receta_codigo:cod,ingrediente:ing,cantidad:parseFloat(it.cantidad)||0,unidad:it.unidad||"",categoria:it.categoria||""}); }); saveDB(); }
+function guardarIngrediente(d){
+  const nombre=(d.nombre||"").trim(); const i=ingByName(nombre);
+  const kcal=(d.kcal!==""&&d.kcal!=null)?parseFloat(d.kcal):null;
+  const lact=[1,true,"1","true","on"].includes(d.lactosa)?1:0;
+  const v={unidad:d.unidad||"",precio:d.precio??null,mercados:d.mercados||"",categoria:d.categoria||"Otros",kcal,lactosa:lact,histamina:d.histamina||"baja",alergenos:d.alergenos||""};
+  if(i)Object.assign(i,v); else DB.ingredientes.push({nombre,...v});
+  if(!DB.inventario.find(x=>x.ingrediente===nombre))DB.inventario.push({ingrediente:nombre,cantidad:0}); saveDB();
+}
+function borrarIngrediente(nombre){ DB.ingredientes=DB.ingredientes.filter(i=>i.nombre!==nombre); DB.inventario=DB.inventario.filter(x=>x.ingrediente!==nombre); saveDB(); }
+
+function localApi(path,method,body){
+  body=body||{}; const [p,queryStr]=path.split("?"); const qs=new URLSearchParams(queryStr||"");
+  switch(p){
+    case "/estado": return {semana:semanaActual(),menu:menuActual(),n_compra:listaCompra().filter(x=>x.por_comprar>0).length};
+    case "/compra": return listaCompra();
+    case "/inventario": if(method==="POST"){ setInv(body.ingrediente,parseFloat(body.cantidad)||0); saveDB(); return {ok:true}; } return inventarioList();
+    case "/comprado": addInv(body.ingrediente,parseFloat(body.cantidad)||0); saveDB(); return {ok:true};
+    case "/historial": return historialList();
+    case "/recetas": return DB.recetas.slice().sort((a,b)=>(a.tipo<b.tipo?1:a.tipo>b.tipo?-1:0)||a.codigo.localeCompare(b.codigo));
+    case "/receta": return recetaDetalle(qs.get("codigo"))||{error:"no encontrada"};
+    case "/ingredientes": return ingredientesList();
+    case "/categorias": return categoriasList();
+    case "/generar": if(body.modo==="inventario")generarMenuInventario(); else generarMenu(!!body.resortear); return menuActual();
+    case "/cambiar_plato": { const n=cambiarPlatoLocal(body.codigo); return {ok:n!=null,codigo:n}; }
+    case "/consumir": consumir(body.codigo); return {ok:true};
+    case "/desconsumir": desconsumir(body.codigo); return {ok:true};
+    case "/receta/guardar": return {ok:true,codigo:guardarReceta(body)};
+    case "/receta/borrar": borrarReceta(body.codigo); return {ok:true};
+    case "/bom/guardar": guardarBom(body.codigo,body.items); return {ok:true};
+    case "/ingrediente/guardar": guardarIngrediente(body); return {ok:true};
+    case "/ingrediente/borrar": borrarIngrediente(body.nombre); return {ok:true};
+    default: return {error:"no encontrado"};
+  }
+}
+async function api(p){ return localApi(p,"GET"); }
+function post(p,b){ return Promise.resolve(localApi(p,"POST",b)); }
+
+// ---- Datos (backup) ----
+function renderDatos(){
+  view.innerHTML=`
+    <div class="card"><strong>Copia de seguridad</strong>
+      <div class="sub">Tus datos viven SOLO en este dispositivo. Exporta de vez en cuando por seguridad.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn" onclick="exportarDatos()">⬇️ Exportar</button>
+        <label class="btn ghost" style="cursor:pointer">⬆️ Importar<input type="file" accept="application/json" onchange="importarDatos(event)" style="display:none"></label>
+      </div></div>
+    <div class="card"><strong>Estado</strong>
+      <div class="sub">${DB.recetas.length} recetas · ${DB.ingredientes.length} ingredientes · ${DB.menu.length} filas de menú · ${DB.historial.length} en historial</div></div>`;
+}
+function exportarDatos(){ const b=new Blob([JSON.stringify(DB)],{type:"application/json"}); const a=document.createElement("a");
+  a.href=URL.createObjectURL(b); a.download="recetario-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click(); flash("Backup descargado"); }
+function importarDatos(ev){ const f=ev.target.files[0]; if(!f)return; const rd=new FileReader();
+  rd.onload=()=>{ try{ const d=JSON.parse(rd.result); if(!d.recetas||!d.ingredientes)throw 0; DB=d; if(!DB.seq)DB.seq={bom:0,historial:0,menu:0};
+    saveDB(); flash("Datos importados"); loadRefs().then(render); }catch(e){ flash("Archivo inválido"); } }; rd.readAsText(f); }
+function flash(m){const f=$("#flash");f.textContent=m;f.classList.add("show");setTimeout(()=>f.classList.remove("show"),1600);}
+const esc = s => (s??"").toString().replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function nutriBadges(n){
+  if(!n) return "";
+  let a = n.alergenos;
+  if(typeof a === "string") a = a.split(",").filter(Boolean);
+  let h="";
+  if(n.histamina==="alta")  h+='<span class="pill alta">histamina alta</span>';
+  else if(n.histamina==="media") h+='<span class="pill media">histamina media</span>';
+  if(Number(n.lactosa))     h+='<span class="pill lact">lactosa</span>';
+  (a||[]).forEach(x=>h+=`<span class="pill aler">${esc(x)}</span>`);
+  return h;
+}
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  tab=b.dataset.tab;
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  render();
+});
+
+async function loadRefs(){
+  [CATS, INGS] = await Promise.all([api("/categorias"), api("/ingredientes")]);
+  $("#dl-ings").innerHTML = INGS.map(i=>`<option value="${esc(i.nombre)}">`).join("");
+}
+
+async function refreshSub(){
+  const e = await api("/estado");
+  $("#sub").textContent = e.menu.semana
+    ? `Semana ${e.menu.semana} · ${e.menu.items.length} comidas · ${e.n_compra} por comprar`
+    : "Aún no has generado un menú";
+}
+
+async function render(){
+  refreshSub();
+  ({menu:renderMenu,compra:renderCompra,inventario:renderInventario,
+    historial:renderHistorial,editar:renderEditar,datos:renderDatos}[tab])();
+}
+
+// ---------------- Menú ----------------
+async function renderMenu(){
+  if(!DB.recetas.length){
+    view.innerHTML=`<div class="card"><strong>👋 Bienvenido a Recetario</strong>
+      <div class="sub" style="margin-top:6px">Para cargar tus recetas e ingredientes: ve a la pestaña
+      <b>Datos → ⬆️ Importar</b> y elige tu archivo <b>mis-datos-recetario.json</b>.
+      Tus datos se guardan solo en este dispositivo.</div>
+      <button class="btn" style="margin-top:12px" onclick="document.querySelector('[data-tab=datos]').click()">Ir a Datos</button></div>`;
+    return;
+  }
+  const m = await api("/estado").then(e=>e.menu);
+  const g = {"Desayuno":[], "Almuerzo/Cena":[]};
+  (m.items||[]).forEach(i=>g[i.tipo]?.push(i));
+  const col = (t,arr) => `<div class="card"><h3>${t}</h3>
+    ${arr.length ? arr.map(i=>`<div class="meal ${i.consumida?'done':''}">
+        <div style="min-width:0">
+          <div><span class="code">${i.codigo}</span><span class="name">${esc(i.nombre)}</span></div>
+          <div class="nb"><span class="kcal">${i.nutri?.kcal ?? '–'} kcal</span>${nutriBadges(i.nutri)}</div>
+        </div>
+        ${i.consumida
+          ? `<button class="mini undo" onclick="desmarcar('${i.codigo}')">↩ deshacer</button>`
+          : `<div style="display:flex;gap:4px;flex-shrink:0">
+               <button class="mini" onclick="cambiarPlato('${i.codigo}')" title="Cambiar solo este plato">🔄</button>
+               <button class="mini" onclick="marcar('${i.codigo}')">✓ consumir</button></div>`}
+      </div>`).join("") : '<div class="empty">—</div>'}</div>`;
+  view.innerHTML = `
+    <div class="card row">
+      <div><strong>Menú de la semana ${m.semana||''}</strong>
+        <div class="sub">Sortea 5 desayunos + 10 almuerzo/cena, evitando repetir lo reciente.</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${m.items&&m.items.length?'<button class="btn ghost sm" onclick="resortear()">↻ Resortear</button>':''}
+        <button class="btn ghost sm" onclick="generarInv()" title="Prioriza recetas con ingredientes que ya tienes">🧺 Según inventario</button>
+        <button class="btn" onclick="generar()">🎲 Generar semana</button>
+      </div>
+    </div>
+    ${!m.items||!m.items.length ? '<div class="empty">No hay menú todavía. Pulsa «Generar semana».</div>'
+      : `<div class="grid">${col("Desayunos",g["Desayuno"])}${col("Almuerzo / Cena",g["Almuerzo/Cena"])}</div>`}`;
+}
+async function generar(){ await post("/generar",{}); flash("Nueva semana generada"); render(); }
+async function generarInv(){ await post("/generar",{modo:"inventario"}); flash("Menú según tu inventario"); render(); }
+async function cambiarPlato(c){ const r=await post("/cambiar_plato",{codigo:c}); if(r.ok){ flash("Plato cambiado"); render(); } else flash("Sin alternativa disponible"); }
+async function resortear(){ if(confirm("¿Volver a sortear ESTA semana? Se reemplaza el menú actual.")){ await post("/generar",{resortear:true}); flash("Semana resorteada"); render(); } }
+async function marcar(c){ await post("/consumir",{codigo:c}); flash("Marcada como consumida"); render(); }
+async function desmarcar(c){ await post("/desconsumir",{codigo:c}); flash("Deshecho · inventario devuelto"); render(); }
+
+// ---------------- Compra ----------------
+let compraCache=[];
+async function renderCompra(){
+  compraCache = (await api("/compra")).filter(x=>x.por_comprar>0);
+  view.innerHTML = `
+    <div class="card"><div class="row"><strong>Lista de compra</strong>
+      <span class="tag">${compraCache.length} ingredientes</span></div>
+      <div class="sub">Toca un ingrediente para ver en qué recetas se usa. «Comprado» suma la cantidad al inventario.</div></div>
+    ${compraCache.length ? '<div id="buylist"></div>'
+      : '<div class="empty">Nada que comprar (o no hay menú generado).</div>'}`;
+  pintaCompra();
+}
+function itemCompra(x){
+  const i = compraCache.indexOf(x);
+  return `<div style="padding:8px 0;border-bottom:1px solid var(--line)">
+    <div class="row">
+      <div style="min-width:0">
+        <button class="link" style="font-weight:600" onclick="toggleRec(${i})">
+          ▸ ${esc(x.ingrediente)} <span class="tag">${x.recetas.length} receta${x.recetas.length!=1?'s':''}</span>
+        </button>
+        <div class="nb">${nutriBadges(x)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="sub">tengo ${x.tengo} · necesito ${x.necesita}</span>
+        <span class="buy">${x.por_comprar} ${esc(x.unidad||'')}</span>
+        <button class="btn sm" onclick="comprado(${i})">🛒 comprado</button>
+      </div>
+    </div>
+    <div id="rec_${i}" style="display:none;margin-top:8px;padding:8px 0 4px">
+      ${x.recetas.map(r=>`<div class="meal" style="padding:5px 0">
+        <div><span class="code">${r.codigo}</span>${esc(r.nombre)}</div>
+        <span class="sub">${r.cantidad} ${esc(x.unidad||'')}</span></div>`).join("") || '<div class="sub">—</div>'}
+      ${x.mercados?`<div class="sub" style="margin-top:6px">📍 ${esc(x.mercados)}</div>`:''}
+    </div></div>`;
+}
+function pintaCompra(){
+  const el=$("#buylist"); if(!el) return;
+  const byCat={};
+  compraCache.forEach(x=>(byCat[x.categoria||"Otros"] ||= []).push(x));
+  const cats=Object.keys(byCat).sort((a,b)=>CATS.indexOf(a)-CATS.indexOf(b));
+  el.innerHTML = cats.map(cat=>`
+    <details open>
+      <summary>${esc(cat)} <span class="tag">${byCat[cat].length}</span></summary>
+      <div class="inner">${byCat[cat].map(itemCompra).join("")}</div>
+    </details>`).join("");
+}
+function toggleRec(i){ const e=$("#rec_"+i); e.style.display = e.style.display==='none'?'block':'none'; }
+async function comprado(i){
+  const x=compraCache[i];
+  await post("/comprado",{ingrediente:x.ingrediente,cantidad:x.por_comprar});
+  flash(`+${x.por_comprar} ${x.unidad||''} · ${x.ingrediente} → inventario`);
+  renderCompra();
+}
+
+// ---------------- Inventario (plegable por categoría) ----------------
+let invCache=[];
+async function renderInventario(){
+  invCache = await api("/inventario");
+  view.innerHTML = `
+    <input class="search" id="q" placeholder="Buscar ingrediente…" oninput="pintaInv()">
+    <label class="sub" style="display:flex;align-items:center;gap:6px;margin:-2px 0 10px;cursor:pointer">
+      <input type="checkbox" id="soloStock" onchange="pintaInv()" style="width:auto"> Solo con stock (&gt;0)</label>
+    <div id="invwrap"></div>`;
+  pintaInv();
+}
+function pintaInv(){
+  const q=($("#q")?.value||"").toLowerCase();
+  const solo=$("#soloStock")?.checked;
+  const rows=invCache.filter(r=>r.ingrediente.toLowerCase().includes(q) && (!solo || r.cantidad>0));
+  const byCat={};
+  rows.forEach(r=>(byCat[r.categoria||"Otros"] ||= []).push(r));
+  const cats=Object.keys(byCat).sort((a,b)=>CATS.indexOf(a)-CATS.indexOf(b));
+  $("#invwrap").innerHTML = cats.length ? cats.map(cat=>`
+    <details ${q?'open':''}>
+      <summary>${esc(cat)} <span class="tag">${byCat[cat].length}</span></summary>
+      <div class="inner"><table>
+        ${byCat[cat].map(r=>{const id=btoa(unescape(encodeURIComponent(r.ingrediente)));return `<tr>
+          <td>${esc(r.ingrediente)}</td>
+          <td class="num"><input type="number" step="0.1" value="${r.cantidad}" id="inv_${id}"></td>
+          <td style="width:60px">${esc(r.unidad||'')}</td>
+          <td style="width:70px"><button class="mini" onclick="guardaInv('${encodeURIComponent(r.ingrediente)}')">✓</button></td>
+        </tr>`}).join("")}
+      </table></div>
+    </details>`).join("") : '<div class="empty">Sin resultados.</div>';
+}
+async function guardaInv(enc){
+  const ing=decodeURIComponent(enc);
+  const val=$("#inv_"+btoa(unescape(encodeURIComponent(ing)))).value;
+  await post("/inventario",{ingrediente:ing,cantidad:val});
+  const r=invCache.find(x=>x.ingrediente===ing); if(r) r.cantidad=parseFloat(val);
+  flash("Guardado: "+ing);
+}
+
+// ---------------- Historial ----------------
+async function renderHistorial(){
+  const h = await api("/historial");
+  view.innerHTML = `<div class="card" style="overflow-x:auto">
+    ${h.length ? `<table><tr><th>Semana</th><th>Código</th><th>Receta</th><th class="num">Puntuación</th></tr>
+      ${h.map(x=>`<tr><td>${x.semana??'—'}</td><td class="code">${x.codigo||''}</td>
+        <td>${esc(x.nombre||'(borrada)')}</td><td class="num">${x.puntuacion??0}</td></tr>`).join("")}
+    </table>` : '<div class="empty">Sin historial.</div>'}</div>`;
+}
+
+// ---------------- Editar (Admin) ----------------
+let adminSub="recetas";
+async function renderEditar(){
+  await loadRefs();
+  view.innerHTML = `
+    <div class="card"><div class="row">
+      <div style="display:flex;gap:6px">
+        <button class="mini ${adminSub==='recetas'?'':''}" id="sr" onclick="setSub('recetas')">Recetas</button>
+        <button class="mini" id="si" onclick="setSub('ingredientes')">Ingredientes</button>
+      </div>
+      <button class="btn sm" onclick="${adminSub==='recetas'?'nuevaReceta()':'nuevoIngrediente()'}">+ Nuevo</button>
+    </div></div>
+    <div id="adminbody"></div>`;
+  $("#s"+(adminSub==='recetas'?'r':'i')).classList.add('btn','sm');
+  adminSub==='recetas' ? listaRecetas() : listaIngredientes();
+}
+function setSub(s){ adminSub=s; renderEditar(); }
+
+// --- Recetas
+async function listaRecetas(){
+  const rs = await api("/recetas");
+  $("#adminbody").innerHTML = `
+    <input class="search" id="qr" placeholder="Buscar receta…" oninput="filtraRec()">
+    <div class="card"><div id="reclist"></div></div>`;
+  window._recs=rs; filtraRec();
+}
+function filtraRec(){
+  const q=($("#qr")?.value||"").toLowerCase();
+  $("#reclist").innerHTML = window._recs.filter(r=>r.nombre.toLowerCase().includes(q))
+    .map(r=>`<div class="meal"><div><span class="code">${r.codigo}</span>
+      <button class="link" onclick="editaReceta('${r.codigo}')">${esc(r.nombre)}</button></div>
+      <span class="tag">${r.tipo==='Desayuno'?'Desayuno':'Alm/Cena'}</span></div>`).join("")
+    || '<div class="empty">Sin resultados.</div>';
+}
+async function nuevaReceta(){
+  const d={receta:{codigo:"",nombre:"",tipo:"Almuerzo/Cena"},ingredientes:[]};
+  panelReceta(d,true);
+}
+async function editaReceta(cod){ panelReceta(await api("/receta?codigo="+encodeURIComponent(cod))); }
+function panelReceta(d,nueva){
+  const r=d.receta;
+  const bom = d.ingredientes.length?d.ingredientes:[{ingrediente:"",cantidad:1,unidad:""}];
+  $("#adminbody").innerHTML = `
+    <div class="card">
+      <div class="row" style="margin-bottom:6px">
+        <strong>${nueva?"Nueva receta":"Editar "+r.codigo}</strong>
+        <button class="link" onclick="listaRecetas()">← volver</button>
+      </div>
+      ${d.nutri?`<div class="nb" style="margin-bottom:10px"><span class="kcal">${d.nutri.kcal} kcal</span>${nutriBadges(d.nutri)}</div>`:''}
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <input id="rn" placeholder="Nombre de la receta" value="${esc(r.nombre)}" style="flex:1;min-width:200px">
+        <select id="rt">
+          <option ${r.tipo==='Desayuno'?'selected':''}>Desayuno</option>
+          <option ${r.tipo!=='Desayuno'?'selected':''}>Almuerzo/Cena</option>
+        </select>
+      </div>
+      <h3>Ingredientes</h3>
+      <div id="bom">${bom.map(bomRow).join("")}</div>
+      <button class="mini" onclick="addBom()">+ ingrediente</button>
+      <div class="row" style="margin-top:14px">
+        ${nueva?'':`<button class="del" onclick="borraReceta('${r.codigo}')">🗑 borrar receta</button>`}
+        <button class="btn" onclick="guardaReceta('${r.codigo}')">Guardar</button>
+      </div>
+    </div>`;
+}
+function bomRow(b){ return `<div class="bomrow">
+  <input list="dl-ings" placeholder="ingrediente" value="${esc(b.ingrediente)}">
+  <input type="number" step="0.1" placeholder="cant." value="${b.cantidad??1}">
+  <input placeholder="unidad" value="${esc(b.unidad||'')}">
+  <button class="del" onclick="this.parentElement.remove()">✕</button></div>`; }
+function addBom(){ $("#bom").insertAdjacentHTML("beforeend", bomRow({ingrediente:"",cantidad:1,unidad:""})); }
+async function guardaReceta(cod){
+  const nombre=$("#rn").value.trim(), tipo=$("#rt").value;
+  if(!nombre){ flash("Ponle nombre"); return; }
+  const res=await post("/receta/guardar",{codigo:cod,nombre,tipo});
+  const codigo=res.codigo;
+  const items=[...document.querySelectorAll("#bom .bomrow")].map(row=>{
+    const [i,c,u]=row.querySelectorAll("input");
+    return {ingrediente:i.value.trim(),cantidad:c.value,unidad:u.value.trim()};
+  }).filter(x=>x.ingrediente);
+  await post("/bom/guardar",{codigo,items});
+  flash("Receta guardada ("+codigo+")"); listaRecetas();
+}
+async function borraReceta(cod){ if(confirm("¿Borrar la receta "+cod+"? (el historial se conserva)")){ await post("/receta/borrar",{codigo:cod}); flash("Receta borrada"); listaRecetas(); } }
+
+// --- Ingredientes
+async function listaIngredientes(){
+  $("#adminbody").innerHTML = `<input class="search" id="qi" placeholder="Buscar ingrediente…" oninput="filtraIng()">
+    <div id="inglist"></div>`;
+  filtraIng();
+}
+const HISTS=["baja","media","alta"];
+function filtraIng(){
+  const q=($("#qi")?.value||"").toLowerCase();
+  const rows=INGS.filter(r=>r.nombre.toLowerCase().includes(q));
+  const fld=(lbl,inner)=>`<label class="sub" style="display:flex;flex-direction:column;gap:2px">${lbl}${inner}</label>`;
+  $("#inglist").innerHTML = rows.map(r=>{const id=INGS.indexOf(r);return `
+    <div class="card" style="padding:10px 14px">
+      <div class="row">
+        <div style="min-width:0"><strong>${esc(r.nombre)}</strong><div class="nb">${nutriBadges(r)}</div></div>
+        <button class="del" onclick="borraIng(${id})">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
+        ${fld("Categoría",`<select id="ic_${id}">${CATS.map(c=>`<option ${c===r.categoria?'selected':''}>${esc(c)}</option>`).join("")}</select>`)}
+        ${fld("Unidad",`<input id="iu_${id}" value="${esc(r.unidad||'')}" style="width:80px">`)}
+        ${fld("kcal/ud",`<input type="number" id="ik_${id}" value="${r.kcal??''}" style="width:70px">`)}
+        ${fld("Histamina",`<select id="ih_${id}">${HISTS.map(h=>`<option ${h===(r.histamina||'baja')?'selected':''}>${h}</option>`).join("")}</select>`)}
+        ${fld("&nbsp;",`<label style="display:flex;align-items:center;gap:5px;padding-bottom:6px"><input type="checkbox" id="il_${id}" ${Number(r.lactosa)?'checked':''} style="width:auto"> lactosa</label>`)}
+        ${fld("Alérgenos (coma)",`<input id="ia_${id}" value="${esc(r.alergenos||'')}" style="width:150px">`)}
+        ${fld("Mercados",`<input id="im_${id}" value="${esc(r.mercados||'')}" style="width:150px">`)}
+        <button class="btn sm" onclick="guardaIng(${id})">✓ guardar</button>
+      </div>
+    </div>`}).join("") || '<div class="empty">Sin resultados.</div>';
+}
+async function guardaIng(id){
+  const r=INGS[id];
+  const d={nombre:r.nombre,categoria:$("#ic_"+id).value,unidad:$("#iu_"+id).value.trim(),
+           mercados:$("#im_"+id).value.trim(),precio:r.precio,
+           kcal:$("#ik_"+id).value,lactosa:$("#il_"+id).checked?1:0,
+           histamina:$("#ih_"+id).value,alergenos:$("#ia_"+id).value.trim()};
+  await post("/ingrediente/guardar",d);
+  Object.assign(r,d); flash("Guardado: "+r.nombre); filtraIng();
+}
+async function borraIng(id){ const r=INGS[id]; if(confirm("¿Borrar '"+r.nombre+"' del maestro e inventario?")){ await post("/ingrediente/borrar",{nombre:r.nombre}); flash("Borrado"); await loadRefs(); filtraIng(); } }
+async function nuevoIngrediente(){
+  const nombre=prompt("Nombre del nuevo ingrediente:"); if(!nombre) return;
+  await post("/ingrediente/guardar",{nombre:nombre.trim(),categoria:"Otros",unidad:"",mercados:""});
+  await loadRefs(); flash("Ingrediente añadido"); listaIngredientes();
+}
+
+// ---------------- init ----------------
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+initDB().then(loadRefs).then(render).catch(e=>{
+  view.innerHTML='<div class="empty">Error cargando datos: '+esc(e&&e.message||e)+'</div>';
+});
+</script>
+</body>
+</html>
