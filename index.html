@@ -238,7 +238,7 @@ function menuActual(){
 }
 function listaCompra(){
   const sem=maxMenuSem(), nec={}, recs={};
-  DB.menu.filter(m=>m.semana===sem).forEach(m=>bomOf(m.codigo).forEach(b=>{
+  DB.menu.filter(m=>m.semana===sem&&!m.consumida).forEach(m=>bomOf(m.codigo).forEach(b=>{
     const e=nec[b.ingrediente]||(nec[b.ingrediente]={qty:0,unidad:b.unidad,cat:b.categoria}); e.qty+=b.cantidad||0;
     const r=recetaByCodigo(m.codigo)||{}; (recs[b.ingrediente]||(recs[b.ingrediente]=[])).push({codigo:m.codigo,nombre:r.nombre,cantidad:b.cantidad}); }));
   const inv=invMap(), cub=cubiertosSet(), out=[];
