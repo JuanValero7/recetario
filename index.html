@@ -21,9 +21,9 @@
       --okbg:rgba(75,189,136,.16);}
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+  body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;max-width:100vw;
+    font:17px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
   header{position:sticky;top:0;z-index:10;background:var(--bg);
     padding:14px 16px 10px;max-width:640px;margin:0 auto;border-bottom:1px solid var(--line)}
   h1{margin:0;font-size:26px;letter-spacing:-.2px;font-weight:800}
@@ -58,7 +58,7 @@
   .mini{background:var(--chip);border:0;border-radius:10px;padding:10px 13px;font-size:14px;cursor:pointer;color:var(--ink);min-height:40px}
   .mini.undo{color:var(--warn)}
   table{width:100%;border-collapse:collapse}
-  th,td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:middle}
+  th,td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:middle;word-break:break-word}
   th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   .tag{background:var(--chip);color:var(--muted);border-radius:20px;padding:3px 10px;font-size:12px}
@@ -76,7 +76,7 @@
   details>summary::-webkit-details-marker{display:none}
   details>summary::after{content:"▸";color:var(--muted);font-size:12px}
   details[open]>summary::after{content:"▾"}
-  details .inner{padding:0 14px 8px}
+  details .inner{padding:0 14px 8px;overflow-x:auto}
   .nb{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px}
   .kcal{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
   .pill{font-size:11px;padding:1px 8px;border-radius:20px;border:1px solid var(--line);white-space:nowrap}
@@ -102,8 +102,8 @@
   .mealc.done .mname{text-decoration:line-through;color:var(--muted)}
   .dot{width:11px;height:11px;border-radius:50%;background:var(--line);flex-shrink:0}
   .dot.g{background:var(--accent);box-shadow:0 0 0 3px var(--okbg)}
-  .mname{flex:1;min-width:0;font-size:17px;font-weight:600;line-height:1.25;
-    overflow:hidden;text-overflow:ellipsis}
+  .mname{flex:1;min-width:0;font-size:18px;font-weight:600;line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mic{display:flex;gap:3px;font-size:15px;flex-shrink:0}
   .chev{color:var(--muted);font-size:20px;flex-shrink:0;transition:transform .15s}
   .mealc.open .chev{transform:rotate(90deg)}
@@ -159,9 +159,11 @@ async function initDB(){
   const saved=localStorage.getItem(STORE_KEY);
   if(saved){ DB=JSON.parse(saved); }
   else { DB=await fetch("seed.json").then(r=>r.json()); if(!DB.seq)DB.seq={bom:0,historial:0,menu:0}; saveDB(); }
+  if(!DB.cubiertos) DB.cubiertos=[];   // ingredientes marcados "no compro / tengo sustituto"
   if(navigator.storage&&navigator.storage.persist){ try{ await navigator.storage.persist(); }catch(e){} }
 }
 function saveDB(){ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+const cubiertosSet=()=>new Set(DB.cubiertos||[]);
 function nextId(t){ DB.seq[t]=(DB.seq[t]||0)+1; return DB.seq[t]; }
 const recetaByCodigo=c=>DB.recetas.find(r=>r.codigo===c);
 const ingByName=n=>DB.ingredientes.find(i=>i.nombre===n);
@@ -214,18 +216,18 @@ function nutriReceta(cod){
     if(i.alergenos)i.alergenos.split(",").filter(Boolean).forEach(a=>al.add(a)); });
   return {kcal:Math.round(kcal),histamina:HIST_INV[hist],lactosa:lact?1:0,alergenos:[...al].sort()};
 }
-function dispCoste(cod, inv){
-  inv=inv||invMap(); let disponible=true, coste=0, tienePrecio=false;
+function dispCoste(cod, inv, cub){
+  inv=inv||invMap(); cub=cub||cubiertosSet(); let disponible=true, coste=0, tienePrecio=false;
   bomOf(cod).forEach(b=>{ const i=ingByName(b.ingrediente)||{};
-    if((inv[b.ingrediente]||0) < (b.cantidad||0)) disponible=false;
+    if((inv[b.ingrediente]||0) < (b.cantidad||0) && !cub.has(b.ingrediente)) disponible=false;
     if(i.precio!=null){ coste+=i.precio*(b.cantidad||0); tienePrecio=true; } });
   return {disponible, coste: tienePrecio?Math.round(coste*100)/100:null};
 }
 function menuActual(){
-  const sem=maxMenuSem(), inv=invMap();
+  const sem=maxMenuSem(), inv=invMap(), cub=cubiertosSet();
   const items=sem==null?[]:DB.menu.filter(m=>m.semana===sem)
     .sort((a,b)=>(a.tipo<b.tipo?1:a.tipo>b.tipo?-1:0)||a.id-b.id)
-    .map(m=>{ const r=recetaByCodigo(m.codigo)||{}, dc=dispCoste(m.codigo,inv);
+    .map(m=>{ const r=recetaByCodigo(m.codigo)||{}, dc=dispCoste(m.codigo,inv,cub);
       return {codigo:m.codigo,tipo:m.tipo,consumida:m.consumida,nombre:r.nombre,nutri:nutriReceta(m.codigo),disponible:dc.disponible,coste:dc.coste}; });
   return {semana:sem,items};
 }
@@ -234,10 +236,11 @@ function listaCompra(){
   DB.menu.filter(m=>m.semana===sem).forEach(m=>bomOf(m.codigo).forEach(b=>{
     const e=nec[b.ingrediente]||(nec[b.ingrediente]={qty:0,unidad:b.unidad,cat:b.categoria}); e.qty+=b.cantidad||0;
     const r=recetaByCodigo(m.codigo)||{}; (recs[b.ingrediente]||(recs[b.ingrediente]=[])).push({codigo:m.codigo,nombre:r.nombre,cantidad:b.cantidad}); }));
-  const inv=invMap(), out=[];
-  for(const ing in nec){ const e=nec[ing], m=ingByName(ing), tengo=inv[ing]||0, falta=(e.qty||0)-tengo;
+  const inv=invMap(), cub=cubiertosSet(), out=[];
+  for(const ing in nec){ const e=nec[ing], m=ingByName(ing), tengo=inv[ing]||0, falta=(e.qty||0)-tengo, esCub=cub.has(ing);
     out.push({ingrediente:ing,necesita:Math.round(e.qty*100)/100,tengo:Math.round(tengo*100)/100,
-      por_comprar:falta>0?Math.ceil(falta):0,unidad:(m&&m.unidad)||e.unidad,categoria:(m&&m.categoria)||"Otros",
+      por_comprar:esCub?0:(falta>0?Math.ceil(falta):0),cubierto:esCub,
+      unidad:(m&&m.unidad)||e.unidad,categoria:(m&&m.categoria)||"Otros",
       mercados:(m&&m.mercados)||"",precio:(m&&m.precio)??null,
       recetas:(recs[ing]||[]).sort((a,b)=>(a.nombre||"").localeCompare(b.nombre||"")),
       lactosa:(m&&m.lactosa)||0,histamina:(m&&m.histamina)||"baja",alergenos:(m&&m.alergenos)||""}); }
@@ -299,7 +302,10 @@ function localApi(path,method,body){
     case "/estado": return {semana:semanaActual(),menu:menuActual(),n_compra:listaCompra().filter(x=>x.por_comprar>0).length};
     case "/compra": return listaCompra();
     case "/inventario": if(method==="POST"){ setInv(body.ingrediente,parseFloat(body.cantidad)||0); saveDB(); return {ok:true}; } return inventarioList();
-    case "/comprado": addInv(body.ingrediente,parseFloat(body.cantidad)||0); saveDB(); return {ok:true};
+    case "/comprado": addInv(body.ingrediente,parseFloat(body.cantidad)||0);
+      DB.cubiertos=(DB.cubiertos||[]).filter(x=>x!==body.ingrediente); saveDB(); return {ok:true};
+    case "/cubrir": { const s=new Set(DB.cubiertos||[]); s.add(body.ingrediente); DB.cubiertos=[...s]; saveDB(); return {ok:true}; }
+    case "/descubrir": DB.cubiertos=(DB.cubiertos||[]).filter(x=>x!==body.ingrediente); saveDB(); return {ok:true};
     case "/historial": return historialList();
     case "/recetas": return DB.recetas.slice().sort((a,b)=>(a.tipo<b.tipo?1:a.tipo>b.tipo?-1:0)||a.codigo.localeCompare(b.codigo));
     case "/receta": return recetaDetalle(qs.get("codigo"))||{error:"no encontrada"};
@@ -348,7 +354,7 @@ function importarDatos(ev){ const f=ev.target.files[0]; if(!f)return; const rd=n
         return;
       }
       if(!d.recetas||!d.ingredientes)throw 0;       // backup completo -> reemplaza
-      DB=d; if(!DB.seq)DB.seq={bom:0,historial:0,menu:0};
+      DB=d; if(!DB.seq)DB.seq={bom:0,historial:0,menu:0}; if(!DB.cubiertos)DB.cubiertos=[];
       saveDB(); flash("Datos importados"); loadRefs().then(render);
     }catch(e){ flash("Archivo inválido"); } }; rd.readAsText(f); }
 function flash(m){const f=$("#flash");f.textContent=m;f.classList.add("show");setTimeout(()=>f.classList.remove("show"),1600);}
@@ -458,10 +464,10 @@ async function renderMenu(){
   const col = (t,arr) => `<div class="card"><h3>${t} · ${arr.length}</h3>
     ${arr.length ? arr.map(fila).join("") : '<div class="empty">—</div>'}</div>`;
   view.innerHTML = `
-    <div class="card" style="display:flex;gap:8px">
-      <button class="btn" style="flex:2;display:flex;justify-content:center" onclick="generar()">🎲 Generar semana</button>
-      <button class="btn ghost" style="flex:1;display:flex;justify-content:center" onclick="generarInv()" title="Prioriza lo que ya tienes">🧺 Stock</button>
-      ${hay?'<button class="btn ghost" style="flex:1;display:flex;justify-content:center" onclick="resortear()">↻</button>':''}
+    <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" style="flex:2 1 140px;display:flex;justify-content:center" onclick="generar()">🎲 Generar semana</button>
+      <button class="btn ghost" style="flex:1 1 90px;display:flex;justify-content:center" onclick="generarInv()" title="Prioriza lo que ya tienes">🧺 Stock</button>
+      ${hay?'<button class="btn ghost" style="flex:0 0 52px;display:flex;justify-content:center" onclick="resortear()">↻</button>':''}
     </div>
     ${!hay ? '<div class="empty">No hay menú todavía. Pulsa «Generar semana».</div>'
       : col("Desayunos",g["Desayuno"])+col("Almuerzo / Cena",g["Almuerzo/Cena"])}`;
@@ -481,56 +487,62 @@ async function desmarcar(c){ await post("/desconsumir",{codigo:c}); flash("Deshe
 // ---------------- Compra ----------------
 let compraCache=[];
 async function renderCompra(){
-  compraCache = (await api("/compra")).filter(x=>x.por_comprar>0);
+  compraCache = await api("/compra");
+  const comprar = compraCache.filter(x=>x.por_comprar>0);
+  const cubiertos = compraCache.filter(x=>x.cubierto);
   view.innerHTML = `
-    <div class="card"><div class="row"><strong>Lista de compra</strong>
-      <span class="tag">${compraCache.length} ingredientes</span></div>
-      <div class="sub">Toca un ingrediente para ver en qué recetas se usa. «Comprado» suma la cantidad al inventario.</div></div>
-    ${compraCache.length ? '<div id="buylist"></div>'
-      : '<div class="empty">Nada que comprar (o no hay menú generado).</div>'}`;
+    <div class="card"><div class="row"><strong>Por comprar</strong>
+      <span class="tag">${comprar.length}</span></div>
+      <div class="sub">Toca un ingrediente para ver recetas y acciones. «No compro» = ya lo tienes o usarás sustituto.</div></div>
+    ${comprar.length ? '<div id="buylist"></div>' : '<div class="empty">Nada que comprar 🎉</div>'}
+    ${cubiertos.length ? `<details style="margin-top:6px">
+        <summary>✋ No compro / tengo sustituto <span class="tag">${cubiertos.length}</span></summary>
+        <div class="inner">${cubiertos.map(x=>{const i=compraCache.indexOf(x);return `
+          <div class="row" style="padding:12px 2px;border-bottom:1px solid var(--line)">
+            <span>${esc(x.ingrediente)}</span>
+            <button class="mini" onclick="descubrir(${i})">↩ a la compra</button></div>`}).join("")}</div>
+      </details>` : ''}`;
   pintaCompra();
 }
 function itemCompra(x){
   const i = compraCache.indexOf(x);
-  return `<div style="padding:8px 0;border-bottom:1px solid var(--line)">
-    <div class="row">
-      <div style="min-width:0">
-        <button class="link" style="font-weight:600" onclick="toggleRec(${i})">
-          ▸ ${esc(x.ingrediente)} <span class="tag">${x.recetas.length} receta${x.recetas.length!=1?'s':''}</span>
-        </button>
-        <span class="mic" style="margin-left:6px">${nutriIcons(x)}</span>
+  return `
+    <button class="mealc" onclick="toggleRec(${i})">
+      <span class="mname">${esc(x.ingrediente)}</span>
+      <span class="mic">${nutriIcons(x)}</span>
+      <span class="buy">${x.por_comprar} ${esc(x.unidad||'')}</span>
+      <span class="chev">›</span>
+    </button>
+    <div class="detail" id="rec_${i}" hidden>
+      <div class="sub" style="margin-bottom:10px">Tengo ${x.tengo} · necesito ${x.necesita}${x.mercados?' · 📍 '+esc(x.mercados):''}</div>
+      ${x.recetas.map(r=>`<div class="alert" style="justify-content:space-between">
+        <span><span class="code">${r.codigo}</span>${esc(r.nombre)}</span>
+        <span class="sub">${r.cantidad} ${esc(x.unidad||'')}</span></div>`).join("")}
+      <div class="actions">
+        <button class="btn" onclick="comprado(${i})">🛒 Comprado</button>
+        <button class="btn ghost" onclick="noCompro(${i})">✋ No compro</button>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <span class="sub">tengo ${x.tengo} · necesito ${x.necesita}</span>
-        <span class="buy">${x.por_comprar} ${esc(x.unidad||'')}</span>
-        <button class="btn sm" onclick="comprado(${i})">🛒 comprado</button>
-      </div>
-    </div>
-    <div id="rec_${i}" style="display:none;margin-top:8px;padding:8px 0 4px">
-      ${x.recetas.map(r=>`<div class="meal" style="padding:5px 0">
-        <div><span class="code">${r.codigo}</span>${esc(r.nombre)}</div>
-        <span class="sub">${r.cantidad} ${esc(x.unidad||'')}</span></div>`).join("") || '<div class="sub">—</div>'}
-      ${x.mercados?`<div class="sub" style="margin-top:6px">📍 ${esc(x.mercados)}</div>`:''}
-    </div></div>`;
+    </div>`;
 }
 function pintaCompra(){
   const el=$("#buylist"); if(!el) return;
+  const items=compraCache.filter(x=>x.por_comprar>0);
   const byCat={};
-  compraCache.forEach(x=>(byCat[x.categoria||"Otros"] ||= []).push(x));
+  items.forEach(x=>(byCat[x.categoria||"Otros"] ||= []).push(x));
   const cats=Object.keys(byCat).sort((a,b)=>CATS.indexOf(a)-CATS.indexOf(b));
-  el.innerHTML = cats.map(cat=>`
-    <details open>
-      <summary>${esc(cat)} <span class="tag">${byCat[cat].length}</span></summary>
-      <div class="inner">${byCat[cat].map(itemCompra).join("")}</div>
-    </details>`).join("");
+  el.innerHTML = cats.map(cat=>`<div class="card"><h3>${esc(cat)} · ${byCat[cat].length}</h3>
+    ${byCat[cat].map(itemCompra).join("")}</div>`).join("");
 }
-function toggleRec(i){ const e=$("#rec_"+i); e.style.display = e.style.display==='none'?'block':'none'; }
-async function comprado(i){
-  const x=compraCache[i];
+function toggleRec(i){ const d=$("#rec_"+i); if(!d)return; d.hidden=!d.hidden; const r=d.previousElementSibling; if(r)r.classList.toggle("open",!d.hidden); }
+async function comprado(i){ const x=compraCache[i];
   await post("/comprado",{ingrediente:x.ingrediente,cantidad:x.por_comprar});
-  flash(`+${x.por_comprar} ${x.unidad||''} · ${x.ingrediente} → inventario`);
-  renderCompra();
-}
+  flash(`+${x.por_comprar} ${x.unidad||''} · ${x.ingrediente} → inventario`); renderCompra(); }
+async function noCompro(i){ const x=compraCache[i];
+  await post("/cubrir",{ingrediente:x.ingrediente});
+  flash(`${x.ingrediente}: marcado como que ya lo tienes`); renderCompra(); }
+async function descubrir(i){ const x=compraCache[i];
+  await post("/descubrir",{ingrediente:x.ingrediente});
+  flash(`${x.ingrediente}: vuelve a la compra`); renderCompra(); }
 
 // ---------------- Inventario (plegable por categoría) ----------------
 let invCache=[];
@@ -713,7 +725,11 @@ async function nuevoIngrediente(){
 }
 
 // ---------------- init ----------------
-if("serviceWorker" in navigator){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+if("serviceWorker" in navigator){
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(refreshing)return; refreshing=true; location.reload(); });
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{}));
+}
 initDB().then(loadRefs).then(render).catch(e=>{
   view.innerHTML='<div class="empty">Error cargando datos: '+esc(e&&e.message||e)+'</div>';
 });
