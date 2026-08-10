@@ -1,6 +1,6 @@
 // Service worker — network-first con fallback a caché.
 // Online: siempre la última versión. Offline: lo cacheado.
-const CACHE = "recetario-v4";
+const CACHE = "recetario-v5";
 const ASSETS = ["./", "./index.html", "./seed.json", "./manifest.webmanifest",
                 "./icon-192.png", "./icon-512.png"];
 

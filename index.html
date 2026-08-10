@@ -106,7 +106,12 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mic{display:flex;gap:3px;font-size:15px;flex-shrink:0}
   .chev{color:var(--muted);font-size:20px;flex-shrink:0;transition:transform .15s}
-  .mealc.open .chev{transform:rotate(90deg)}
+  .open .chev{transform:rotate(90deg)}
+  /* fila de compra: nombre (abre detalle) + botón Comprado siempre visible al lado */
+  .buyrow{display:flex;align-items:stretch;gap:8px;border-bottom:1px solid var(--line)}
+  .buyrow:last-of-type{border-bottom:0}
+  .buyrow .mealc{flex:1;min-width:0;width:auto;border-bottom:0;padding-right:6px}
+  .buybtn{flex-shrink:0;align-self:center;min-height:46px;padding:0 16px;font-size:20px;border-radius:11px}
   .detail{padding:4px 4px 16px;border-bottom:1px solid var(--line);animation:fade .15s}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .drow{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px}
@@ -507,20 +512,22 @@ async function renderCompra(){
 function itemCompra(x){
   const i = compraCache.indexOf(x);
   return `
-    <button class="mealc" onclick="toggleRec(${i})">
-      <span class="mname">${esc(x.ingrediente)}</span>
-      <span class="mic">${nutriIcons(x)}</span>
-      <span class="buy">${x.por_comprar} ${esc(x.unidad||'')}</span>
-      <span class="chev">›</span>
-    </button>
+    <div class="buyrow">
+      <button class="mealc" onclick="toggleRec(${i})">
+        <span class="mname">${esc(x.ingrediente)}</span>
+        <span class="mic">${nutriIcons(x)}</span>
+        <span class="buy">${x.por_comprar} ${esc(x.unidad||'')}</span>
+        <span class="chev">›</span>
+      </button>
+      <button class="btn buybtn" onclick="comprado(${i})" title="Comprado — suma al inventario">🛒</button>
+    </div>
     <div class="detail" id="rec_${i}" hidden>
       <div class="sub" style="margin-bottom:10px">Tengo ${x.tengo} · necesito ${x.necesita}${x.mercados?' · 📍 '+esc(x.mercados):''}</div>
       ${x.recetas.map(r=>`<div class="alert" style="justify-content:space-between">
         <span><span class="code">${r.codigo}</span>${esc(r.nombre)}</span>
         <span class="sub">${r.cantidad} ${esc(x.unidad||'')}</span></div>`).join("")}
       <div class="actions">
-        <button class="btn" onclick="comprado(${i})">🛒 Comprado</button>
-        <button class="btn ghost" onclick="noCompro(${i})">✋ No compro</button>
+        <button class="btn ghost" onclick="noCompro(${i})">✋ No compro · ya lo tengo</button>
       </div>
     </div>`;
 }
