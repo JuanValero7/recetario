@@ -11,26 +11,33 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>
   :root{
-    --bg:#f6f7f9; --card:#fff; --ink:#1c2128; --muted:#6a737d; --line:#e5e8eb;
-    --accent:#2f7d5b; --accent-ink:#fff; --chip:#eef2f0; --warn:#b4530a; --danger:#b42318;
+    --bg:#f2f4f6; --card:#fff; --ink:#141a20; --muted:#525c66; --line:#dde2e7;
+    --accent:#20724f; --accent-ink:#fff; --chip:#e7ecea; --warn:#9c4708; --danger:#a51f16;
+    --okbg:rgba(32,114,79,.12);
   }
   @media (prefers-color-scheme:dark){
-    :root{--bg:#15181c; --card:#1e2228; --ink:#e6e9ee; --muted:#9aa4af;
-      --line:#2b313a; --accent:#3fa876; --chip:#232a2b; --warn:#e0913f; --danger:#e5675a;}
+    :root{--bg:#101317; --card:#1b1f25; --ink:#eef1f5; --muted:#a7b2bd;
+      --line:#2c333c; --accent:#4bbd88; --chip:#242b31; --warn:#eda24a; --danger:#f0776a;
+      --okbg:rgba(75,189,136,.16);}
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--ink);
     font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  header{padding:14px 16px 0;max-width:920px;margin:0 auto}
-  h1{margin:0;font-size:24px;letter-spacing:.2px}
-  .sub{color:var(--muted);font-size:14px;margin-top:3px}
-  nav{position:sticky;top:0;z-index:5;display:flex;gap:6px;max-width:920px;margin:12px auto 0;
-    padding:8px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--bg);border-bottom:1px solid var(--line)}
-  nav button{border:0;background:var(--chip);color:var(--muted);padding:11px 16px;border-radius:11px;
-    font-size:15px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-  nav button.on{color:var(--accent-ink);background:var(--accent);font-weight:600}
-  main{max-width:920px;margin:0 auto;padding:14px 14px 90px}
+  header{position:sticky;top:0;z-index:10;background:var(--bg);
+    padding:14px 16px 10px;max-width:640px;margin:0 auto;border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:26px;letter-spacing:-.2px;font-weight:800}
+  .sub{color:var(--muted);font-size:14px;margin-top:2px;font-weight:500}
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;
+    background:var(--card);border-top:1px solid var(--line);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  nav button{flex:1;border:0;background:transparent;color:var(--muted);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;
+    font-size:11px;font-weight:700;border-radius:14px}
+  nav button .ic{font-size:25px;line-height:1;filter:grayscale(.4);opacity:.75}
+  nav button.on{color:var(--accent)}
+  nav button.on .ic{filter:none;opacity:1}
+  main{max-width:640px;margin:0 auto;padding:14px 14px calc(84px + env(safe-area-inset-bottom))}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 12px}
   .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
   .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:11px;
@@ -78,7 +85,7 @@
   .pill.lact{color:var(--accent);border-color:var(--accent)}
   .pill.aler{color:var(--muted)}
   .pill.ok{color:var(--accent);border-color:var(--accent);background:rgba(47,125,91,.10);font-weight:600}
-  .flash{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);
+  .flash{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--ink);
     color:var(--bg);padding:9px 16px;border-radius:9px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
   .flash.show{opacity:.95}
   .link{background:none;border:0;color:var(--accent);cursor:pointer;font-size:14px;padding:0;text-align:left}
@@ -86,22 +93,50 @@
   .bomrow{display:grid;grid-template-columns:1fr 84px 96px 30px;gap:6px;margin-bottom:6px;align-items:center}
   .bomrow input{width:100%}
   @media(max-width:520px){.bomrow{grid-template-columns:1fr 70px 78px 28px}}
+  /* ---- menú compacto ---- */
+  .mealc{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    background:var(--card);border:0;border-bottom:1px solid var(--line);
+    padding:14px 4px;cursor:pointer;color:var(--ink)}
+  .mealc:last-of-type{border-bottom:0}
+  .mealc.ok{background:var(--okbg);border-radius:12px;border-bottom:0;margin:3px 0;padding:14px 12px}
+  .mealc.done .mname{text-decoration:line-through;color:var(--muted)}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--line);flex-shrink:0}
+  .dot.g{background:var(--accent);box-shadow:0 0 0 3px var(--okbg)}
+  .mname{flex:1;min-width:0;font-size:17px;font-weight:600;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis}
+  .mic{display:flex;gap:3px;font-size:15px;flex-shrink:0}
+  .chev{color:var(--muted);font-size:20px;flex-shrink:0;transition:transform .15s}
+  .mealc.open .chev{transform:rotate(90deg)}
+  .detail{padding:4px 4px 16px;border-bottom:1px solid var(--line);animation:fade .15s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .drow{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+  .stat{display:flex;flex-direction:column}
+  .stat b{font-size:20px;font-weight:800}
+  .stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+  .alert{display:flex;align-items:center;gap:8px;padding:7px 0;font-size:15px}
+  .actions{display:flex;gap:8px;margin-top:6px}
+  .actions .btn{flex:1;justify-content:center;display:flex;align-items:center;gap:6px}
+  /* ---- menú Más ---- */
+  .bigrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:transparent;
+    border:0;border-bottom:1px solid var(--line);padding:18px 4px;font-size:17px;font-weight:600;
+    color:var(--ink);cursor:pointer}
+  .bigrow:last-child{border-bottom:0}
+  .bigrow .ic{font-size:26px}
+  .bigrow .chev{margin-left:auto}
 </style>
 </head>
 <body>
 <header>
-  <h1>🍽️ Recetario</h1>
+  <h1 id="title">Recetario</h1>
   <div class="sub" id="sub">Cargando…</div>
 </header>
-<nav>
-  <button data-tab="menu" class="on">Menú</button>
-  <button data-tab="compra">Compra</button>
-  <button data-tab="inventario">Inventario</button>
-  <button data-tab="historial">Historial</button>
-  <button data-tab="editar">Editar</button>
-  <button data-tab="datos">Datos</button>
-</nav>
 <main id="view"></main>
+<nav>
+  <button data-tab="menu" class="on"><span class="ic">🍽️</span>Menú</button>
+  <button data-tab="compra"><span class="ic">🛒</span>Compra</button>
+  <button data-tab="inventario"><span class="ic">📦</span>Inventario</button>
+  <button data-tab="mas"><span class="ic">☰</span>Más</button>
+</nav>
 <div class="flash" id="flash"></div>
 <datalist id="dl-ings"></datalist>
 
@@ -329,12 +364,36 @@ function nutriBadges(n){
   (a||[]).forEach(x=>h+=`<span class="pill aler">${esc(x)}</span>`);
   return h;
 }
+function nutriIcons(n){
+  if(!n) return "";
+  let a=n.alergenos; if(typeof a==="string") a=a.split(",").filter(Boolean);
+  let h="";
+  if(n.histamina==="alta") h+="🔴"; else if(n.histamina==="media") h+="🟠";
+  if(Number(n.lactosa)) h+="🥛";
+  if((a||[]).length) h+="⚠️";
+  return h;
+}
+function nutriDetail(n){
+  if(!n) return "";
+  let a=n.alergenos; if(typeof a==="string") a=a.split(",").filter(Boolean);
+  let h="";
+  if(n.histamina==="alta") h+='<div class="alert">🔴 <span>Histamina <b>alta</b></span></div>';
+  else if(n.histamina==="media") h+='<div class="alert">🟠 <span>Liberador de histamina (media)</span></div>';
+  if(Number(n.lactosa)) h+='<div class="alert">🥛 <span>Contiene lactosa</span></div>';
+  if((a||[]).length) h+='<div class="alert">⚠️ <span>Alérgenos: '+a.map(esc).join(", ")+'</span></div>';
+  return h || '<div class="alert" style="color:var(--muted)">Sin alertas destacadas</div>';
+}
 
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
-  tab=b.dataset.tab;
-  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
-  render();
-});
+const TITLES={menu:"Menú",compra:"Compra",inventario:"Inventario",historial:"Historial",editar:"Editar",datos:"Datos",mas:"Más"};
+const MAIN_TABS=["menu","compra","inventario"];
+function setActiveNav(){
+  document.querySelectorAll("nav button").forEach(b=>{
+    const t=b.dataset.tab;
+    b.classList.toggle("on", t===tab || (t==="mas" && !MAIN_TABS.includes(tab)));
+  });
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+function goTab(t){ tab=t; setActiveNav(); window.scrollTo(0,0); render(); }
 
 async function loadRefs(){
   [CATS, INGS] = await Promise.all([api("/categorias"), api("/ingredientes")]);
@@ -343,6 +402,7 @@ async function loadRefs(){
 
 async function refreshSub(){
   const e = await api("/estado");
+  $("#title").textContent = TITLES[tab] || "Recetario";
   $("#sub").textContent = e.menu.semana
     ? `Semana ${e.menu.semana} · ${e.menu.items.length} comidas · ${e.n_compra} por comprar`
     : "Aún no has generado un menú";
@@ -351,50 +411,65 @@ async function refreshSub(){
 async function render(){
   refreshSub();
   ({menu:renderMenu,compra:renderCompra,inventario:renderInventario,
-    historial:renderHistorial,editar:renderEditar,datos:renderDatos}[tab])();
+    historial:renderHistorial,editar:renderEditar,datos:renderDatos,mas:renderMas}[tab])();
+}
+function renderMas(){
+  view.innerHTML=`<div class="card" style="padding:4px 16px">
+    <button class="bigrow" onclick="goTab('historial')"><span class="ic">🕘</span> Historial <span class="chev">›</span></button>
+    <button class="bigrow" onclick="goTab('editar')"><span class="ic">✏️</span> Editar recetas e ingredientes <span class="chev">›</span></button>
+    <button class="bigrow" onclick="goTab('datos')"><span class="ic">💾</span> Datos y copia de seguridad <span class="chev">›</span></button>
+  </div>`;
 }
 
 // ---------------- Menú ----------------
 async function renderMenu(){
   if(!DB.recetas.length){
     view.innerHTML=`<div class="card"><strong>👋 Bienvenido a Recetario</strong>
-      <div class="sub" style="margin-top:6px">Para cargar tus recetas e ingredientes: ve a la pestaña
-      <b>Datos → ⬆️ Importar</b> y elige tu archivo <b>mis-datos-recetario.json</b>.
-      Tus datos se guardan solo en este dispositivo.</div>
-      <button class="btn" style="margin-top:12px" onclick="document.querySelector('[data-tab=datos]').click()">Ir a Datos</button></div>`;
+      <div class="sub" style="margin-top:6px">Para cargar tus recetas: <b>Más → 💾 Datos → ⬆️ Importar</b>
+      y elige tu archivo <b>mis-datos-recetario.json</b>. Tus datos se guardan solo en este dispositivo.</div>
+      <button class="btn" style="margin-top:12px" onclick="goTab('datos')">Ir a Datos</button></div>`;
     return;
   }
   const m = await api("/estado").then(e=>e.menu);
+  const hay = m.items && m.items.length;
   const g = {"Desayuno":[], "Almuerzo/Cena":[]};
   (m.items||[]).forEach(i=>g[i.tipo]?.push(i));
-  const col = (t,arr) => `<div class="card"><h3>${t}</h3>
-    ${arr.length ? arr.map(i=>`<div class="meal ${i.consumida?'done':''} ${i.disponible&&!i.consumida?'ok':''}">
-        <div style="min-width:0">
-          <div><span class="code">${i.codigo}</span><span class="name">${esc(i.nombre)}</span></div>
-          <div class="nb">
-            ${i.disponible?'<span class="pill ok">✓ tienes todo</span>':''}
-            <span class="kcal">${i.nutri?.kcal ?? '–'} kcal</span>
-            ${i.coste!=null?`<span class="cost">≈ ${i.coste.toFixed(2)} €</span>`:''}
-            ${nutriBadges(i.nutri)}</div>
-        </div>
-        ${i.consumida
-          ? `<button class="mini undo" onclick="desmarcar('${i.codigo}')">↩ deshacer</button>`
-          : `<div style="display:flex;gap:4px;flex-shrink:0">
-               <button class="mini" onclick="cambiarPlato('${i.codigo}')" title="Cambiar solo este plato">🔄</button>
-               <button class="mini" onclick="marcar('${i.codigo}')">✓ consumir</button></div>`}
-      </div>`).join("") : '<div class="empty">—</div>'}</div>`;
-  view.innerHTML = `
-    <div class="card row">
-      <div><strong>Menú de la semana ${m.semana||''}</strong>
-        <div class="sub">Sortea 5 desayunos + 10 almuerzo/cena, evitando repetir lo reciente.</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${m.items&&m.items.length?'<button class="btn ghost sm" onclick="resortear()">↻ Resortear</button>':''}
-        <button class="btn ghost sm" onclick="generarInv()" title="Prioriza recetas con ingredientes que ya tienes">🧺 Según inventario</button>
-        <button class="btn" onclick="generar()">🎲 Generar semana</button>
+  const fila = i => `
+    <button class="mealc ${i.consumida?'done':''} ${i.disponible&&!i.consumida?'ok':''}" onclick="toggleMeal('${i.codigo}')">
+      <span class="dot ${i.disponible?'g':''}"></span>
+      <span class="mname">${esc(i.nombre)}</span>
+      <span class="mic">${nutriIcons(i.nutri)}</span>
+      <span class="chev">›</span>
+    </button>
+    <div class="detail" id="det_${i.codigo}" hidden>
+      <div class="drow">
+        <div class="stat"><b>${i.nutri?.kcal ?? '–'}</b><span>kcal</span></div>
+        ${i.coste!=null?`<div class="stat"><b>${i.coste.toFixed(2)}€</b><span>coste aprox.</span></div>`:''}
+        <div class="stat"><b style="color:${i.disponible?'var(--accent)':'var(--warn)'}">${i.disponible?'Sí ✓':'No'}</b><span>¿tienes todo?</span></div>
       </div>
+      ${nutriDetail(i.nutri)}
+      <div class="actions">
+        ${i.consumida
+          ? `<button class="btn ghost" onclick="desmarcar('${i.codigo}')">↩ Deshacer</button>`
+          : `<button class="btn ghost" onclick="cambiarPlato('${i.codigo}')">🔄 Cambiar</button>
+             <button class="btn" onclick="marcar('${i.codigo}')">✓ Consumir</button>`}
+      </div>
+    </div>`;
+  const col = (t,arr) => `<div class="card"><h3>${t} · ${arr.length}</h3>
+    ${arr.length ? arr.map(fila).join("") : '<div class="empty">—</div>'}</div>`;
+  view.innerHTML = `
+    <div class="card" style="display:flex;gap:8px">
+      <button class="btn" style="flex:2;display:flex;justify-content:center" onclick="generar()">🎲 Generar semana</button>
+      <button class="btn ghost" style="flex:1;display:flex;justify-content:center" onclick="generarInv()" title="Prioriza lo que ya tienes">🧺 Stock</button>
+      ${hay?'<button class="btn ghost" style="flex:1;display:flex;justify-content:center" onclick="resortear()">↻</button>':''}
     </div>
-    ${!m.items||!m.items.length ? '<div class="empty">No hay menú todavía. Pulsa «Generar semana».</div>'
-      : `<div class="grid">${col("Desayunos",g["Desayuno"])}${col("Almuerzo / Cena",g["Almuerzo/Cena"])}</div>`}`;
+    ${!hay ? '<div class="empty">No hay menú todavía. Pulsa «Generar semana».</div>'
+      : col("Desayunos",g["Desayuno"])+col("Almuerzo / Cena",g["Almuerzo/Cena"])}`;
+}
+function toggleMeal(c){
+  const d=document.getElementById("det_"+c); if(!d) return;
+  d.hidden=!d.hidden;
+  const row=d.previousElementSibling; if(row) row.classList.toggle("open", !d.hidden);
 }
 async function generar(){ await post("/generar",{}); flash("Nueva semana generada"); render(); }
 async function generarInv(){ await post("/generar",{modo:"inventario"}); flash("Menú según tu inventario"); render(); }
@@ -423,7 +498,7 @@ function itemCompra(x){
         <button class="link" style="font-weight:600" onclick="toggleRec(${i})">
           ▸ ${esc(x.ingrediente)} <span class="tag">${x.recetas.length} receta${x.recetas.length!=1?'s':''}</span>
         </button>
-        <div class="nb">${nutriBadges(x)}</div>
+        <span class="mic" style="margin-left:6px">${nutriIcons(x)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span class="sub">tengo ${x.tengo} · necesito ${x.necesita}</span>
